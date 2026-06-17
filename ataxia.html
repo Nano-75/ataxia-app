@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a56a0">
+<title>Ataxia · Registro</title>
+<style>
+:root {
+  --blue:       #1a56a0;
+  --blue-light: #e8f1fb;
+  --blue-mid:   #4a80c4;
+  --green:      #0f6e56;
+  --green-light:#e1f5ee;
+  --red:        #a32d2d;
+  --red-light:  #fcebeb;
+  --amber:      #854f0b;
+  --amber-light:#faeeda;
+  --gray0:      #f7f7f5;
+  --gray1:      #ebebea;
+  --gray2:      #c8c7c3;
+  --gray3:      #888780;
+  --gray4:      #444441;
+  --text:       #1c1c1a;
+  --text2:      #5f5e5a;
+  --border:     rgba(0,0,0,0.10);
+  --radius:     12px;
+  --radius-sm:  8px;
+  --nav-h:      64px;
+  --header-h:   56px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--gray0);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;color:var(--text)}
+#app{display:flex;flex-direction:column;height:100%}
+
+/* HEADER */
+.top-bar{height:var(--header-h);background:#fff;border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;position:relative}
+.top-bar h1{font-size:16px;font-weight:600;color:var(--blue);flex:1}
+.top-bar .date-badge{font-size:12px;color:var(--text2);white-space:nowrap}
+
+/* SCREENS */
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:12px 12px calc(var(--nav-h) + 12px);display:none}
+.screen.active{display:block}
+
+/* NAV */
+.bottom-nav{height:var(--nav-h);background:#fff;border-top:0.5px solid var(--border);display:flex;flex-shrink:0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:transparent;cursor:pointer;color:var(--gray3);font-size:11px;font-weight:500;transition:color .15s}
+.nav-btn.active{color:var(--blue)}
+.nav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:10px;overflow:hidden}
+.card-header{padding:12px 14px 8px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);border-bottom:0.5px solid var(--border)}
+
+/* SYMPTOM ROWS */
+.sym-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:0.5px solid var(--border)}
+.sym-row:last-child{border-bottom:none}
+.sym-label{flex:1;font-size:14px;color:var(--text)}
+.stars{display:flex;gap:5px}
+.star{width:32px;height:32px;border-radius:var(--radius-sm);border:0.5px solid var(--gray2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--gray3);transition:all .12s;-webkit-appearance:none}
+.star.on{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.star-val{font-size:13px;font-weight:600;min-width:14px;text-align:center;color:var(--gray3)}
+.star-val.has{color:var(--blue)}
+
+/* PRESSURE */
+.pres-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:0.5px solid var(--border)}
+.pres-row:last-child{border-bottom:none}
+.pres-label{flex:1;font-size:14px}
+.tog{display:flex;gap:4px}
+.tog-btn{padding:6px 14px;border-radius:var(--radius-sm);border:0.5px solid var(--gray2);background:transparent;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .12s}
+.tog-btn.si{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.tog-btn.no{border-color:var(--red);background:var(--red-light);color:var(--red)}
+
+/* NOTES */
+.notes-toggle{width:100%;padding:12px 14px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--blue);font-weight:500;text-align:left}
+.notes-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.notes-body{padding:0 14px 14px;display:none}
+.notes-body.open{display:block}
+textarea{width:100%;min-height:80px;padding:10px;border:0.5px solid var(--gray2);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;color:var(--text);background:var(--gray0);resize:vertical}
+textarea:focus{outline:none;border-color:var(--blue)}
+
+/* ACTION BAR */
+.action-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+.act-btn{padding:11px 6px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:transparent;cursor:pointer;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text);transition:all .12s}
+.act-btn:active{transform:scale(0.97)}
+.act-btn.save{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.act-btn.export{border-color:var(--green);color:var(--green)}
+.act-btn.backup{border-color:var(--amber);color:var(--amber)}
+.act-btn.import-btn{border-color:var(--gray3);color:var(--gray3)}
+.act-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(var(--nav-h) + 12px);left:50%;transform:translateX(-50%) translateY(12px);background:var(--gray4);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green)}
+.toast.err{background:var(--red)}
+
+/* PROGRESS SCREEN */
+.filter-bar{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:12px 14px;margin-bottom:10px}
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.filter-row:last-child{margin-bottom:0}
+.filter-label{font-size:12px;color:var(--text2);min-width:44px}
+input[type=date]{flex:1;padding:7px 10px;border:0.5px solid var(--gray2);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--text);background:var(--gray0)}
+input[type=date]:focus{outline:none;border-color:var(--blue)}
+.period-btns{display:flex;gap:6px;flex-wrap:wrap}
+.period-btn{padding:5px 12px;border-radius:20px;border:0.5px solid var(--gray2);background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .12s}
+.period-btn.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+
+.sym-checks{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px}
+.sym-check{padding:5px 12px;border-radius:20px;border:0.5px solid var(--gray2);background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .12s}
+.sym-check.on{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+
+.chart-wrap{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:14px;margin-bottom:10px;overflow-x:auto}
+canvas{display:block;width:100%;height:220px}
+
+.pres-chart{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:14px;margin-bottom:10px}
+.pres-chart-title{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);margin-bottom:10px}
+.pres-band{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pres-band:last-child{margin-bottom:0}
+.pres-band-label{font-size:12px;color:var(--text2);min-width:64px}
+.pres-dots{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.pres-dot{width:10px;height:10px;border-radius:50%}
+
+/* HISTORY */
+.hist-card{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:8px;overflow:hidden}
+.hist-head{display:flex;align-items:center;padding:10px 14px;gap:8px;cursor:pointer}
+.hist-ts{flex:1;font-size:13px;font-weight:500;color:var(--text)}
+.hist-note-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.hist-edit{padding:6px 12px;border-radius:var(--radius-sm);border:0.5px solid var(--blue);background:transparent;color:var(--blue);font-size:12px;cursor:pointer}
+.hist-del{padding:6px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--red);background:transparent;color:var(--red);font-size:12px;cursor:pointer;margin-left:4px}
+.hist-body{padding:0 14px 12px;display:none;border-top:0.5px solid var(--border)}
+.hist-body.open{display:block}
+.hist-scores{display:flex;flex-wrap:wrap;gap:6px;padding-top:10px}
+.hist-pill{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--gray1);color:var(--text)}
+.hist-pres{margin-top:8px;font-size:12px;color:var(--text2)}
+.hist-note-text{margin-top:8px;font-size:13px;color:var(--text2);font-style:italic;border-left:3px solid var(--amber);padding-left:10px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:flex;align-items:flex-end;justify-content:center;display:none}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--radius) var(--radius) 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 20px)}
+.modal-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-btn{flex:1;padding:12px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:transparent;font-size:14px;font-weight:500;cursor:pointer}
+.modal-btn.confirm{border-color:var(--blue);background:var(--blue);color:#fff}
+.modal-btn.cancel{color:var(--text2)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--text2);font-size:14px}
+
+/* BACKUP REMINDER */
+.reminder{background:var(--amber-light);border:0.5px solid var(--amber);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;font-size:13px;color:var(--amber);display:flex;align-items:center;gap:10px}
+.reminder svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.reminder-close{margin-left:auto;background:transparent;border:none;cursor:pointer;color:var(--amber);font-size:18px;line-height:1}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="top-bar">
+    <h1>Ataxia · Diario</h1>
+    <span class="date-badge" id="topDate"></span>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- SCREEN: REGISTRO -->
+    <div class="screen active" id="sc-registro">
+
+      <div id="reminder-box" style="display:none" class="reminder">
+        <svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        Han pasado 7 días sin copia de seguridad. Recuerda hacer un backup.
+        <button class="reminder-close" onclick="dismissReminder()">×</button>
+      </div>
+
+      <!-- Síntomas -->
+      <div class="card">
+        <div class="card-header">Síntomas · valoración 1–5</div>
+        <div id="sym-list"></div>
+      </div>
+
+      <!-- Presión -->
+      <div class="card">
+        <div class="card-header">Presión</div>
+        <div id="pres-list"></div>
+      </div>
+
+      <!-- Notas -->
+      <div class="card">
+        <button class="notes-toggle" onclick="toggleNotes()">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span id="notes-toggle-label">Añadir nota</span>
+        </button>
+        <div class="notes-body" id="notes-body">
+          <textarea id="nota-txt" placeholder="Escribe aquí tu observación…" rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="card">
+        <div class="action-bar">
+          <button class="act-btn save" onclick="guardar()">
+            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar
+          </button>
+          <button class="act-btn export" onclick="exportarCSV()">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+            Exportar
+          </button>
+          <button class="act-btn backup" onclick="hacerBackup()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Backup
+          </button>
+          <button class="act-btn import-btn" onclick="document.getElementById('import-input').click()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Restaurar
+          </button>
+        </div>
+        <input type="file" id="import-input" accept=".json" style="display:none" onchange="restaurar(event)">
+      </div>
+
+    </div><!-- /sc-registro -->
+
+    <!-- SCREEN: PROGRESO -->
+    <div class="screen" id="sc-progreso">
+
+      <!-- Filtro fechas -->
+      <div class="filter-bar">
+        <div class="filter-row">
+          <span class="filter-label">Período</span>
+          <div class="period-btns">
+            <button class="period-btn active" onclick="setPeriod(1,'day',this)">Hoy</button>
+            <button class="period-btn" onclick="setPeriod(7,'week',this)">7 días</button>
+            <button class="period-btn" onclick="setPeriod(30,'month',this)">30 días</button>
+            <button class="period-btn" onclick="setPeriod(90,'q',this)">3 meses</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">Desde</span>
+          <input type="date" id="f-desde" onchange="renderProgress()">
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">Hasta</span>
+          <input type="date" id="f-hasta" onchange="renderProgress()">
+        </div>
+      </div>
+
+      <!-- Selector síntomas -->
+      <div class="card">
+        <div class="card-header">Síntomas a mostrar</div>
+        <div class="sym-checks" id="sym-checks"></div>
+      </div>
+
+      <!-- Gráfica síntomas -->
+      <div class="chart-wrap">
+        <canvas id="mainChart"></canvas>
+      </div>
+
+      <!-- Gráfica presión -->
+      <div class="pres-chart" id="pres-chart-section">
+        <div class="pres-chart-title">Presión</div>
+        <div id="pres-bands"></div>
+      </div>
+
+      <!-- Historial -->
+      <div class="card">
+        <div class="card-header">Historial de registros</div>
+        <div id="hist-list"></div>
+      </div>
+
+    </div><!-- /sc-progreso -->
+
+  </div><!-- /screens -->
+
+  <!-- NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-registro" onclick="goTo('registro')">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Registrar
+    </button>
+    <button class="nav-btn" id="nav-progreso" onclick="goTo('progreso')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Progreso
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- MODAL EDITAR -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">
+      <svg style="width:18px;height:18px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Editar registro
+    </div>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-btn confirm" onclick="saveEdit()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const SYMPTOMS = [
+  {id:'estabilidad',  label:'Estabilidad'},
+  {id:'rigidez',      label:'Rigidez'},
+  {id:'habla',        label:'Dificultad en el habla'},
+  {id:'coordinacion', label:'Coordinación motora'},
+  {id:'vision',       label:'Visión periférica'},
+  {id:'fatiga',       label:'Nivel de fatiga'},
+];
+const PRESSURE = [
+  {id:'cabeza',    label:'Cabeza',    color:'#1a56a0'},
+  {id:'cervical',  label:'Cervical',  color:'#0f6e56'},
+  {id:'pectoral',  label:'Pectoral',  color:'#854f0b'},
+];
+const SYM_COLORS = ['#1a56a0','#0f6e56','#a32d2d','#854f0b','#533ab7','#2e7d9e'];
+
+// ─── STATE ───────────────────────────────────────────────────────
+let scores   = {};
+let pressure = {};
+let nota     = '';
+let visibleSyms = SYMPTOMS.map(s=>s.id);
+let editId   = null;
+let chart    = null;
+
+SYMPTOMS.forEach(s=>scores[s.id]=0);
+PRESSURE.forEach(p=>pressure[p.id]=null);
+
+// ─── STORAGE ─────────────────────────────────────────────────────
+function loadData(){ return JSON.parse(localStorage.getItem('ataxia_data')||'[]'); }
+function saveData(d){ localStorage.setItem('ataxia_data', JSON.stringify(d)); }
+function getLastBackup(){ return parseInt(localStorage.getItem('ataxia_last_backup')||'0'); }
+function setLastBackup(){ localStorage.setItem('ataxia_last_backup', Date.now()); }
+
+// ─── UTILS ───────────────────────────────────────────────────────
+function pad(n){ return String(n).padStart(2,'0'); }
+function nowStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function todayStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function dateOf(ts){ return ts.slice(0,10); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+function toast(msg, type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+(type);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ─── HEADER DATE ─────────────────────────────────────────────────
+function updateTopDate(){
+  const d=new Date();
+  const days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const months=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  document.getElementById('topDate').textContent=
+    `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}  ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+updateTopDate(); setInterval(updateTopDate,30000);
+
+// ─── NAVIGATION ──────────────────────────────────────────────────
+function goTo(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-'+screen).classList.add('active');
+  document.getElementById('nav-'+screen).classList.add('active');
+  if(screen==='progreso') renderProgress();
+}
+
+// ─── BUILD FORM ──────────────────────────────────────────────────
+function buildForm(){
+  const sl=document.getElementById('sym-list');
+  sl.innerHTML='';
+  SYMPTOMS.forEach(s=>{
+    const row=document.createElement('div');
+    row.className='sym-row';
+    row.innerHTML=`<span class="sym-label">${s.label}</span>
+      <div class="stars" id="stars-${s.id}">
+        ${[1,2,3,4,5].map(i=>`<button class="star" data-sym="${s.id}" data-val="${i}">${i}</button>`).join('')}
+      </div>
+      <span class="star-val" id="sv-${s.id}">—</span>`;
+    sl.appendChild(row);
+  });
+  document.querySelectorAll('.star').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const sym=btn.dataset.sym, val=parseInt(btn.dataset.val);
+      scores[sym]=val;
+      document.getElementById('sv-'+sym).textContent=val;
+      document.getElementById('sv-'+sym).className='star-val has';
+      document.querySelectorAll(`#stars-${sym} .star`).forEach(b=>{
+        b.classList.toggle('on', parseInt(b.dataset.val)<=val);
+      });
+    });
+  });
+
+  const pl=document.getElementById('pres-list');
+  pl.innerHTML='';
+  PRESSURE.forEach(p=>{
+    const row=document.createElement('div');
+    row.className='pres-row';
+    row.innerHTML=`<span class="pres-label">${p.label}</span>
+      <div class="tog">
+        <button class="tog-btn" id="si-${p.id}" data-zone="${p.id}" data-val="si">Sí</button>
+        <button class="tog-btn" id="no-${p.id}" data-zone="${p.id}" data-val="no">No</button>
+      </div>`;
+    pl.appendChild(row);
+  });
+  document.querySelectorAll('.tog-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const z=btn.dataset.zone, v=btn.dataset.val;
+      pressure[z]=v;
+      document.getElementById('si-'+z).className='tog-btn'+(v==='si'?' si':'');
+      document.getElementById('no-'+z).className='tog-btn'+(v==='no'?' no':'');
+    });
+  });
+}
+
+function toggleNotes(){
+  const body=document.getElementById('notes-body');
+  const lbl=document.getElementById('notes-toggle-label');
+  const open=body.classList.toggle('open');
+  lbl.textContent=open?'Cerrar nota':'Añadir nota';
+}
+
+// ─── GUARDAR ─────────────────────────────────────────────────────
+function guardar(){
+  const missing=SYMPTOMS.filter(s=>scores[s.id]===0).map(s=>s.label);
+  const missingP=PRESSURE.filter(p=>pressure[p.id]===null).map(p=>p.label);
+  if(missing.length||missingP.length){
+    toast('Completa todos los campos','err'); return;
+  }
+  const data=loadData();
+  const entry={
+    id:uid(), ts:nowStr(),
+    ...Object.fromEntries(SYMPTOMS.map(s=>[s.id,scores[s.id]])),
+    ...Object.fromEntries(PRESSURE.map(p=>['p_'+p.id, pressure[p.id]])),
+    nota: document.getElementById('nota-txt').value.trim()
+  };
+  data.push(entry);
+  saveData(data);
+  resetForm();
+  toast('Registro guardado','ok');
+  checkReminder();
+}
+
+function resetForm(){
+  SYMPTOMS.forEach(s=>{
+    scores[s.id]=0;
+    document.getElementById('sv-'+s.id).textContent='—';
+    document.getElementById('sv-'+s.id).className='star-val';
+    document.querySelectorAll(`#stars-${s.id} .star`).forEach(b=>b.classList.remove('on'));
+  });
+  PRESSURE.forEach(p=>{
+    pressure[p.id]=null;
+    ['si','no'].forEach(v=>{ document.getElementById(v+'-'+p.id).className='tog-btn'; });
+  });
+  document.getElementById('nota-txt').value='';
+  document.getElementById('notes-body').classList.remove('open');
+  document.getElementById('notes-toggle-label').textContent='Añadir nota';
+}
+
+// ─── EXPORTAR CSV ─────────────────────────────────────────────────
+function exportarCSV(){
+  const data=loadData();
+  if(!data.length){ toast('No hay registros','err'); return; }
+  const headers=['Fecha y hora',...SYMPTOMS.map(s=>s.label),...PRESSURE.map(p=>'Presión '+p.label),'Notas'];
+  const rows=data.map(r=>[
+    r.ts,
+    ...SYMPTOMS.map(s=>r[s.id]),
+    ...PRESSURE.map(p=>r['p_'+p.id]),
+    '"'+(r.nota||'').replace(/"/g,'""')+'"'
+  ].join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  downloadFile('\uFEFF'+csv, `ataxia_${todayStr()}.csv`, 'text/csv');
+  toast('CSV exportado','ok');
+}
+
+// ─── BACKUP / RESTORE ────────────────────────────────────────────
+function hacerBackup(){
+  const data=loadData();
+  if(!data.length){ toast('No hay datos para guardar','err'); return; }
+  downloadFile(JSON.stringify(data,null,2), `ataxia_backup_${todayStr()}.json`, 'application/json');
+  setLastBackup();
+  toast('Backup guardado','ok');
+  document.getElementById('reminder-box').style.display='none';
+}
+
+function restaurar(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data)) throw new Error();
+      if(!confirm(`¿Restaurar ${data.length} registros? Los datos actuales serán reemplazados.`)) return;
+      saveData(data);
+      toast('Datos restaurados correctamente','ok');
+    }catch(err){ toast('Archivo no válido','err'); }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+function downloadFile(content, filename, mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ─── REMINDER ────────────────────────────────────────────────────
+function checkReminder(){
+  const last=getLastBackup();
+  const days7=7*24*60*60*1000;
+  if(last && Date.now()-last > days7){
+    document.getElementById('reminder-box').style.display='flex';
+  }
+}
+function dismissReminder(){
+  document.getElementById('reminder-box').style.display='none';
+}
+
+// ─── PROGRESS SCREEN ─────────────────────────────────────────────
+function buildSymChecks(){
+  const cont=document.getElementById('sym-checks');
+  cont.innerHTML='';
+  SYMPTOMS.forEach(s=>{
+    const btn=document.createElement('button');
+    btn.className='sym-check on';
+    btn.textContent=s.label;
+    btn.dataset.id=s.id;
+    btn.onclick=()=>{
+      btn.classList.toggle('on');
+      visibleSyms=Array.from(document.querySelectorAll('.sym-check.on')).map(b=>b.dataset.id);
+      renderProgress();
+    };
+    cont.appendChild(btn);
+  });
+}
+
+function setPeriod(days, key, btn){
+  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const to=new Date();
+  const from=new Date();
+  from.setDate(from.getDate()-(days-1));
+  document.getElementById('f-desde').value=`${from.getFullYear()}-${pad(from.getMonth()+1)}-${pad(from.getDate())}`;
+  document.getElementById('f-hasta').value=`${to.getFullYear()}-${pad(to.getMonth()+1)}-${pad(to.getDate())}`;
+  renderProgress();
+}
+
+function initDates(){
+  const to=new Date();
+  const from=new Date(); from.setDate(from.getDate()-6);
+  document.getElementById('f-desde').value=`${from.getFullYear()}-${pad(from.getMonth()+1)}-${pad(from.getDate())}`;
+  document.getElementById('f-hasta').value=`${to.getFullYear()}-${pad(to.getMonth()+1)}-${pad(to.getDate())}`;
+}
+
+function renderProgress(){
+  const desde=document.getElementById('f-desde').value;
+  const hasta=document.getElementById('f-hasta').value;
+  if(!desde||!hasta) return;
+
+  const all=loadData();
+  const filtered=all.filter(r=>dateOf(r.ts)>=desde && dateOf(r.ts)<=hasta);
+
+  // Count days in range
+  const d1=new Date(desde), d2=new Date(hasta);
+  const diffDays=Math.round((d2-d1)/(1000*60*60*24))+1;
+  const aggregate=diffDays>7;
+
+  renderChart(filtered, aggregate, desde, hasta, diffDays);
+  renderPresBands(filtered, aggregate, desde, hasta, diffDays);
+  renderHist(filtered);
+}
+
+function renderChart(data, aggregate, desde, hasta, diffDays){
+  const ctx=document.getElementById('mainChart').getContext('2d');
+  if(chart){ chart.destroy(); chart=null; }
+  if(!data.length){
+    // empty
+    chart=new Chart(ctx,{type:'line',data:{labels:[],datasets:[]},options:{plugins:{legend:{display:false}}}});
+    return;
+  }
+
+  let labels=[], datasets=[];
+
+  if(!aggregate){
+    // Individual points by timestamp
+    const sorted=[...data].sort((a,b)=>a.ts.localeCompare(b.ts));
+    labels=sorted.map(r=>r.ts.slice(11,16)+'\n'+r.ts.slice(5,10));
+
+    visibleSyms.forEach((sid,i)=>{
+      const sym=SYMPTOMS.find(s=>s.id===sid);
+      datasets.push({
+        label:sym.label,
+        data:sorted.map(r=>r[sid]),
+        borderColor:SYM_COLORS[SYMPTOMS.findIndex(s=>s.id===sid)],
+        backgroundColor:'transparent',
+        pointRadius:sorted.map(r=>r.nota?7:5),
+        pointStyle:sorted.map(r=>r.nota?'rectRot':'circle'),
+        tension:0.3,
+        borderWidth:2,
+      });
+    });
+  } else {
+    // Aggregate by day
+    const byDay={};
+    data.forEach(r=>{
+      const day=dateOf(r.ts);
+      if(!byDay[day]) byDay[day]={entries:[],hasExtra:false};
+      byDay[day].entries.push(r);
+    });
+    Object.keys(byDay).forEach(day=>{
+      if(byDay[day].entries.length>2) byDay[day].hasExtra=true;
+    });
+    const days=Object.keys(byDay).sort();
+    labels=days.map(d=>d.slice(5));
+
+    visibleSyms.forEach((sid,i)=>{
+      const sym=SYMPTOMS.find(s=>s.id===sid);
+      const vals=days.map(day=>{
+        const entries=byDay[day].entries;
+        const avg=entries.reduce((sum,r)=>sum+r[sid],0)/entries.length;
+        return Math.round(avg*10)/10;
+      });
+      const pStyles=days.map(day=>byDay[day].hasExtra?'triangle':'circle');
+      const pSizes=days.map(day=>byDay[day].hasExtra?8:5);
+      datasets.push({
+        label:sym.label,
+        data:vals,
+        borderColor:SYM_COLORS[SYMPTOMS.findIndex(s=>s.id===sid)],
+        backgroundColor:'transparent',
+        pointStyle:pStyles,
+        pointRadius:pSizes,
+        tension:0.3,
+        borderWidth:2,
+      });
+    });
+  }
+
+  chart=new Chart(ctx,{
+    type:'line',
+    data:{labels, datasets},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{
+          position:'bottom',
+          labels:{font:{size:11},boxWidth:12,padding:10}
+        },
+        tooltip:{
+          callbacks:{
+            afterBody: function(items){
+              if(!aggregate){
+                const idx=items[0].dataIndex;
+                const sorted=[...data].sort((a,b)=>a.ts.localeCompare(b.ts));
+                const r=sorted[idx];
+                if(r.nota) return ['📝 '+r.nota.slice(0,60)+(r.nota.length>60?'…':'')];
+              }
+              return [];
+            }
+          }
+        }
+      },
+      scales:{
+        y:{min:0,max:5,ticks:{stepSize:1,font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{ticks:{font:{size:10},maxRotation:45},grid:{display:false}}
+      }
+    }
+  });
+}
+
+function renderPresBands(data, aggregate, desde, hasta, diffDays){
+  const cont=document.getElementById('pres-bands');
+  cont.innerHTML='';
+  if(!data.length){ cont.innerHTML='<div style="font-size:13px;color:var(--text2)">Sin datos en este período.</div>'; return; }
+
+  if(!aggregate){
+    const sorted=[...data].sort((a,b)=>a.ts.localeCompare(b.ts));
+    PRESSURE.forEach(p=>{
+      const band=document.createElement('div');
+      band.className='pres-band';
+      band.innerHTML=`<span class="pres-band-label">${p.label}</span><div class="pres-dots">${
+        sorted.map(r=>`<div class="pres-dot" style="background:${r['p_'+p.id]==='si'?p.color:'#d3d1c7'}" title="${r.ts}: ${r['p_'+p.id]}"></div>`).join('')
+      }</div>`;
+      cont.appendChild(band);
+    });
+  } else {
+    const byDay={};
+    data.forEach(r=>{
+      const day=dateOf(r.ts);
+      if(!byDay[day]) byDay[day]=[];
+      byDay[day].push(r);
+    });
+    const days=Object.keys(byDay).sort();
+    PRESSURE.forEach(p=>{
+      const band=document.createElement('div');
+      band.className='pres-band';
+      band.innerHTML=`<span class="pres-band-label">${p.label}</span><div class="pres-dots">${
+        days.map(day=>{
+          const hasSi=byDay[day].some(r=>r['p_'+p.id]==='si');
+          return `<div class="pres-dot" style="background:${hasSi?p.color:'#d3d1c7'}" title="${day}"></div>`;
+        }).join('')
+      }</div>`;
+      cont.appendChild(band);
+    });
+  }
+}
+
+function renderHist(data){
+  const cont=document.getElementById('hist-list');
+  cont.innerHTML='';
+  const sorted=[...data].sort((a,b)=>b.ts.localeCompare(a.ts));
+  if(!sorted.length){ cont.innerHTML='<div class="empty">Sin registros en este período.</div>'; return; }
+  sorted.forEach(r=>{
+    const card=document.createElement('div');
+    card.className='hist-card';
+    const noteDot=r.nota?'<span class="hist-note-dot" title="Tiene nota"></span>':'';
+    card.innerHTML=`
+      <div class="hist-head" onclick="toggleHist('hb-${r.id}')">
+        <span class="hist-ts">${r.ts}</span>
+        ${noteDot}
+        <button class="hist-edit" onclick="event.stopPropagation();openEdit('${r.id}')">Editar</button>
+        <button class="hist-del" onclick="event.stopPropagation();eliminar('${r.id}')">✕</button>
+      </div>
+      <div class="hist-body" id="hb-${r.id}">
+        <div class="hist-scores">${SYMPTOMS.map(s=>`<span class="hist-pill">${s.label.split(' ')[0]}: ${r[s.id]}</span>`).join('')}</div>
+        <div class="hist-pres">${PRESSURE.map(p=>`${p.label}: <strong>${r['p_'+p.id]}</strong>`).join(' · ')}</div>
+        ${r.nota?`<div class="hist-note-text">${r.nota}</div>`:''}
+      </div>`;
+    cont.appendChild(card);
+  });
+}
+
+function toggleHist(id){
+  const el=document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
+
+function eliminar(id){
+  if(!confirm('¿Eliminar este registro?')) return;
+  const data=loadData().filter(r=>r.id!==id);
+  saveData(data);
+  renderProgress();
+  toast('Registro eliminado');
+}
+
+// ─── EDIT MODAL ───────────────────────────────────────────────────
+function openEdit(id){
+  const data=loadData();
+  const r=data.find(x=>x.id===id);
+  if(!r) return;
+  editId=id;
+
+  let html=`<p style="font-size:12px;color:var(--text2);margin-bottom:14px">${r.ts}</p>`;
+
+  SYMPTOMS.forEach(s=>{
+    html+=`<div style="margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:6px">${s.label}</div>
+      <div style="display:flex;gap:5px" id="me-stars-${s.id}">
+        ${[1,2,3,4,5].map(i=>`<button class="star${r[s.id]>=i?' on':''}" data-msym="${s.id}" data-mval="${i}">${i}</button>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  PRESSURE.forEach(p=>{
+    html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="flex:1;font-size:14px">${p.label}</span>
+      <div class="tog">
+        <button class="tog-btn${r['p_'+p.id]==='si'?' si':''}" id="msi-${p.id}" data-mzone="${p.id}" data-mval="si">Sí</button>
+        <button class="tog-btn${r['p_'+p.id]==='no'?' no':''}" id="mno-${p.id}" data-mzone="${p.id}" data-mval="no">No</button>
+      </div>
+    </div>`;
+  });
+
+  html+=`<textarea id="modal-nota" placeholder="Nota…" style="width:100%;margin-top:4px">${r.nota||''}</textarea>`;
+
+  document.getElementById('modal-body').innerHTML=html;
+
+  document.querySelectorAll('[data-msym]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const sym=btn.dataset.msym, val=parseInt(btn.dataset.mval);
+      document.querySelectorAll(`#me-stars-${sym} [data-msym]`).forEach(b=>{
+        b.classList.toggle('on',parseInt(b.dataset.mval)<=val);
+      });
+    });
+  });
+  document.querySelectorAll('[data-mzone]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const z=btn.dataset.mzone, v=btn.dataset.mval;
+      document.getElementById('msi-'+z).className='tog-btn'+(v==='si'?' si':'');
+      document.getElementById('mno-'+z).className='tog-btn'+(v==='no'?' no':'');
+    });
+  });
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  editId=null;
+}
+
+function saveEdit(){
+  const data=loadData();
+  const idx=data.findIndex(r=>r.id===editId);
+  if(idx===-1){ closeModal(); return; }
+  const r=data[idx];
+
+  SYMPTOMS.forEach(s=>{
+    const on=document.querySelectorAll(`#me-stars-${s.id} .star.on`);
+    r[s.id]=on.length;
+  });
+  PRESSURE.forEach(p=>{
+    if(document.getElementById('msi-'+p.id).classList.contains('si')) r['p_'+p.id]='si';
+    else if(document.getElementById('mno-'+p.id).classList.contains('no')) r['p_'+p.id]='no';
+  });
+  r.nota=document.getElementById('modal-nota').value.trim();
+  data[idx]=r;
+  saveData(data);
+  closeModal();
+  renderProgress();
+  toast('Registro actualizado','ok');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+buildForm();
+buildSymChecks();
+initDates();
+checkReminder();
+</script>
+</body>
+</html>
