@@ -11,7 +11,6 @@
 :root {
   --blue:       #1a56a0;
   --blue-light: #e8f1fb;
-  --blue-mid:   #4a80c4;
   --green:      #0f6e56;
   --green-light:#e1f5ee;
   --red:        #a32d2d;
@@ -36,13 +35,18 @@ html,body{height:100%;overflow:hidden;background:var(--gray0);font-family:-apple
 #app{display:flex;flex-direction:column;height:100%}
 
 /* HEADER */
-.top-bar{height:var(--header-h);background:#fff;border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;position:relative}
+.top-bar{height:var(--header-h);background:#fff;border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
 .top-bar h1{font-size:16px;font-weight:600;color:var(--blue);flex:1}
-.top-bar .date-badge{font-size:12px;color:var(--text2);white-space:nowrap}
+.date-badge{font-size:12px;color:var(--text2);white-space:nowrap}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--gray2);flex-shrink:0;transition:background .3s}
+.sync-dot.ok{background:var(--green)}
+.sync-dot.err{background:var(--red)}
+.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* SCREENS */
 .screens{flex:1;overflow:hidden;position:relative}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:12px 12px calc(var(--nav-h) + 12px);display:none}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:12px 12px calc(var(--nav-h)+12px);display:none}
 .screen.active{display:block}
 
 /* NAV */
@@ -55,7 +59,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray0);font-family:-apple
 .card{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:10px;overflow:hidden}
 .card-header{padding:12px 14px 8px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);border-bottom:0.5px solid var(--border)}
 
-/* SYMPTOM ROWS */
+/* SYMPTOMS */
 .sym-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:0.5px solid var(--border)}
 .sym-row:last-child{border-bottom:none}
 .sym-label{flex:1;font-size:14px;color:var(--text)}
@@ -84,21 +88,19 @@ textarea:focus{outline:none;border-color:var(--blue)}
 
 /* ACTION BAR */
 .action-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
-.act-btn{padding:11px 6px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:transparent;cursor:pointer;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text);transition:all .12s}
+.act-btn{padding:12px 6px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:transparent;cursor:pointer;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .12s}
 .act-btn:active{transform:scale(0.97)}
-.act-btn.save{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.act-btn.save{border-color:var(--blue);color:var(--blue);background:var(--blue-light);grid-column:1/-1}
 .act-btn.export{border-color:var(--green);color:var(--green)}
-.act-btn.backup{border-color:var(--amber);color:var(--amber)}
-.act-btn.import-btn{border-color:var(--gray3);color:var(--gray3)}
 .act-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* TOAST */
-.toast{position:fixed;bottom:calc(var(--nav-h) + 12px);left:50%;transform:translateX(-50%) translateY(12px);background:var(--gray4);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast{position:fixed;bottom:calc(var(--nav-h)+12px);left:50%;transform:translateX(-50%) translateY(12px);background:var(--gray4);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.ok{background:var(--green)}
 .toast.err{background:var(--red)}
 
-/* PROGRESS SCREEN */
+/* PROGRESS */
 .filter-bar{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:12px 14px;margin-bottom:10px}
 .filter-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .filter-row:last-child{margin-bottom:0}
@@ -113,11 +115,17 @@ input[type=date]:focus{outline:none;border-color:var(--blue)}
 .sym-check{padding:5px 12px;border-radius:20px;border:0.5px solid var(--gray2);background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .12s}
 .sym-check.on{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
 
-.chart-wrap{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:14px;margin-bottom:10px;overflow-x:auto}
-canvas{display:block;width:100%;height:220px}
+/* CHART SECTIONS */
+.chart-section{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:14px;margin-bottom:10px}
+.chart-section-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.chart-section-title .franja{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.franja.manana{background:var(--amber-light);color:var(--amber)}
+.franja.tarde{background:var(--blue-light);color:var(--blue)}
+canvas{display:block;width:100%;height:200px}
 
-.pres-chart{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:14px;margin-bottom:10px}
-.pres-chart-title{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);margin-bottom:10px}
+/* PRESSURE BANDS */
+.pres-section{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:14px;margin-bottom:10px}
+.pres-section-title{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .pres-band{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .pres-band:last-child{margin-bottom:0}
 .pres-band-label{font-size:12px;color:var(--text2);min-width:64px}
@@ -129,6 +137,9 @@ canvas{display:block;width:100%;height:220px}
 .hist-head{display:flex;align-items:center;padding:10px 14px;gap:8px;cursor:pointer}
 .hist-ts{flex:1;font-size:13px;font-weight:500;color:var(--text)}
 .hist-note-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.hist-franja{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.hist-franja.m{background:var(--amber-light);color:var(--amber)}
+.hist-franja.t{background:var(--blue-light);color:var(--blue)}
 .hist-edit{padding:6px 12px;border-radius:var(--radius-sm);border:0.5px solid var(--blue);background:transparent;color:var(--blue);font-size:12px;cursor:pointer}
 .hist-del{padding:6px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--red);background:transparent;color:var(--red);font-size:12px;cursor:pointer;margin-left:4px}
 .hist-body{padding:0 14px 12px;display:none;border-top:0.5px solid var(--border)}
@@ -139,58 +150,43 @@ canvas{display:block;width:100%;height:220px}
 .hist-note-text{margin-top:8px;font-size:13px;color:var(--text2);font-style:italic;border-left:3px solid var(--amber);padding-left:10px}
 
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:flex;align-items:flex-end;justify-content:center;display:none}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:var(--radius) var(--radius) 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 20px)}
-.modal-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal{background:#fff;border-radius:var(--radius) var(--radius) 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px calc(env(safe-area-inset-bottom,0px)+20px)}
+.modal-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:16px}
 .modal-actions{display:flex;gap:8px;margin-top:16px}
 .modal-btn{flex:1;padding:12px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:transparent;font-size:14px;font-weight:500;cursor:pointer}
 .modal-btn.confirm{border-color:var(--blue);background:var(--blue);color:#fff}
 .modal-btn.cancel{color:var(--text2)}
 
-/* EMPTY STATE */
-.empty{text-align:center;padding:40px 20px;color:var(--text2);font-size:14px}
-
-/* BACKUP REMINDER */
-.reminder{background:var(--amber-light);border:0.5px solid var(--amber);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;font-size:13px;color:var(--amber);display:flex;align-items:center;gap:10px}
-.reminder svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
-.reminder-close{margin-left:auto;background:transparent;border:none;cursor:pointer;color:var(--amber);font-size:18px;line-height:1}
+.empty{text-align:center;padding:30px 20px;color:var(--text2);font-size:14px}
+.hint{font-size:11px;color:var(--gray3);margin-top:8px;text-align:center}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- HEADER -->
   <div class="top-bar">
     <h1>Ataxia · Diario</h1>
     <span class="date-badge" id="topDate"></span>
+    <div class="sync-dot" id="syncDot" title="Estado de conexión"></div>
   </div>
 
-  <!-- SCREENS -->
   <div class="screens">
 
-    <!-- SCREEN: REGISTRO -->
+    <!-- ── REGISTRO ── -->
     <div class="screen active" id="sc-registro">
 
-      <div id="reminder-box" style="display:none" class="reminder">
-        <svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-        Han pasado 7 días sin copia de seguridad. Recuerda hacer un backup.
-        <button class="reminder-close" onclick="dismissReminder()">×</button>
-      </div>
-
-      <!-- Síntomas -->
       <div class="card">
         <div class="card-header">Síntomas · valoración 1–5</div>
         <div id="sym-list"></div>
       </div>
 
-      <!-- Presión -->
       <div class="card">
         <div class="card-header">Presión</div>
         <div id="pres-list"></div>
       </div>
 
-      <!-- Notas -->
       <div class="card">
         <button class="notes-toggle" onclick="toggleNotes()">
           <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -201,43 +197,33 @@ canvas{display:block;width:100%;height:220px}
         </div>
       </div>
 
-      <!-- Botones -->
       <div class="card">
         <div class="action-bar">
           <button class="act-btn save" onclick="guardar()">
             <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Guardar
+            Guardar registro
           </button>
           <button class="act-btn export" onclick="exportarCSV()">
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
-            Exportar
-          </button>
-          <button class="act-btn backup" onclick="hacerBackup()">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Backup
-          </button>
-          <button class="act-btn import-btn" onclick="document.getElementById('import-input').click()">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Restaurar
+            Exportar CSV
           </button>
         </div>
-        <input type="file" id="import-input" accept=".json" style="display:none" onchange="restaurar(event)">
       </div>
 
     </div><!-- /sc-registro -->
 
-    <!-- SCREEN: PROGRESO -->
+    <!-- ── PROGRESO ── -->
     <div class="screen" id="sc-progreso">
 
-      <!-- Filtro fechas -->
+      <!-- Filtros -->
       <div class="filter-bar">
         <div class="filter-row">
           <span class="filter-label">Período</span>
           <div class="period-btns">
-            <button class="period-btn active" onclick="setPeriod(1,'day',this)">Hoy</button>
-            <button class="period-btn" onclick="setPeriod(7,'week',this)">7 días</button>
-            <button class="period-btn" onclick="setPeriod(30,'month',this)">30 días</button>
-            <button class="period-btn" onclick="setPeriod(90,'q',this)">3 meses</button>
+            <button class="period-btn active" onclick="setPeriod(1,this)">Hoy</button>
+            <button class="period-btn" onclick="setPeriod(7,this)">7 días</button>
+            <button class="period-btn" onclick="setPeriod(30,this)">30 días</button>
+            <button class="period-btn" onclick="setPeriod(90,this)">3 meses</button>
           </div>
         </div>
         <div class="filter-row">
@@ -256,15 +242,36 @@ canvas{display:block;width:100%;height:220px}
         <div class="sym-checks" id="sym-checks"></div>
       </div>
 
-      <!-- Gráfica síntomas -->
-      <div class="chart-wrap">
-        <canvas id="mainChart"></canvas>
+      <!-- Gráfica Mañana -->
+      <div class="chart-section">
+        <div class="chart-section-title">
+          <span class="franja manana">Mañana · 0h–12h</span>
+          <span style="font-size:11px;color:var(--gray3)">▲ = más de un registro</span>
+        </div>
+        <canvas id="chartManana"></canvas>
+        <div class="hint" id="emptyManana" style="display:none">Sin registros en esta franja para el período seleccionado.</div>
       </div>
 
-      <!-- Gráfica presión -->
-      <div class="pres-chart" id="pres-chart-section">
-        <div class="pres-chart-title">Presión</div>
-        <div id="pres-bands"></div>
+      <!-- Gráfica Tarde -->
+      <div class="chart-section">
+        <div class="chart-section-title">
+          <span class="franja tarde">Tarde · 12h–24h</span>
+          <span style="font-size:11px;color:var(--gray3)">▲ = más de un registro</span>
+        </div>
+        <canvas id="chartTarde"></canvas>
+        <div class="hint" id="emptyTarde" style="display:none">Sin registros en esta franja para el período seleccionado.</div>
+      </div>
+
+      <!-- Presión -->
+      <div class="pres-section">
+        <div class="pres-section-title">
+          Presión
+          <span class="franja manana" style="font-size:10px;padding:2px 8px">Mañana</span>
+          <span class="franja tarde" style="font-size:10px;padding:2px 8px">Tarde</span>
+        </div>
+        <div id="pres-manana-bands"></div>
+        <div style="height:10px"></div>
+        <div id="pres-tarde-bands"></div>
       </div>
 
       <!-- Historial -->
@@ -277,7 +284,6 @@ canvas{display:block;width:100%;height:220px}
 
   </div><!-- /screens -->
 
-  <!-- NAV -->
   <nav class="bottom-nav">
     <button class="nav-btn active" id="nav-registro" onclick="goTo('registro')">
       <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -294,10 +300,7 @@ canvas{display:block;width:100%;height:220px}
 <!-- MODAL EDITAR -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
-    <div class="modal-title">
-      <svg style="width:18px;height:18px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      Editar registro
-    </div>
+    <div class="modal-title">Editar registro</div>
     <div id="modal-body"></div>
     <div class="modal-actions">
       <button class="modal-btn cancel" onclick="closeModal()">Cancelar</button>
@@ -309,38 +312,40 @@ canvas{display:block;width:100%;height:220px}
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ─── SUPABASE ────────────────────────────────────────────────────
+const SUPA_URL = 'https://xgrowiforncfnyqosirs.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhncm93aWZvcm5jZm55cW9zaXJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNjIxODcsImV4cCI6MjEwMjYzODE4N30.t72xXytWINbXbfn5WalwDeKxOaSGqpnqDiBFNO5OyZU';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ─── CONFIG ──────────────────────────────────────────────────────
 const SYMPTOMS = [
-  {id:'estabilidad',  label:'Estabilidad'},
+  {id:'estabilidad',  label:'Inestabilidad'},
   {id:'rigidez',      label:'Rigidez'},
   {id:'habla',        label:'Dificultad en el habla'},
-  {id:'coordinacion', label:'Coordinación motora'},
+  {id:'coordinacion', label:'Descoordinación'},
   {id:'vision',       label:'Visión periférica'},
   {id:'fatiga',       label:'Nivel de fatiga'},
 ];
 const PRESSURE = [
-  {id:'cabeza',    label:'Cabeza',    color:'#1a56a0'},
-  {id:'cervical',  label:'Cervical',  color:'#0f6e56'},
-  {id:'pectoral',  label:'Pectoral',  color:'#854f0b'},
+  {id:'cabeza',   label:'Cabeza',   color:'#1a56a0'},
+  {id:'cervical', label:'Cervical', color:'#0f6e56'},
+  {id:'pectoral', label:'Pectoral', color:'#854f0b'},
 ];
 const SYM_COLORS = ['#1a56a0','#0f6e56','#a32d2d','#854f0b','#533ab7','#2e7d9e'];
+const HORA_CORTE = 12; // 0h–12h mañana · 12h–24h tarde
 
 // ─── STATE ───────────────────────────────────────────────────────
-let scores   = {};
-let pressure = {};
-let nota     = '';
+let scores      = {};
+let pressure    = {};
 let visibleSyms = SYMPTOMS.map(s=>s.id);
-let editId   = null;
-let chart    = null;
+let editId      = null;
+let chartM      = null;
+let chartT      = null;
 
 SYMPTOMS.forEach(s=>scores[s.id]=0);
 PRESSURE.forEach(p=>pressure[p.id]=null);
-
-// ─── STORAGE ─────────────────────────────────────────────────────
-function loadData(){ return JSON.parse(localStorage.getItem('ataxia_data')||'[]'); }
-function saveData(d){ localStorage.setItem('ataxia_data', JSON.stringify(d)); }
-function getLastBackup(){ return parseInt(localStorage.getItem('ataxia_last_backup')||'0'); }
-function setLastBackup(){ localStorage.setItem('ataxia_last_backup', Date.now()); }
 
 // ─── UTILS ───────────────────────────────────────────────────────
 function pad(n){ return String(n).padStart(2,'0'); }
@@ -353,16 +358,19 @@ function todayStr(){
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
 function dateOf(ts){ return ts.slice(0,10); }
+function hourOf(ts){ return parseInt(ts.slice(11,13)); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function isManana(ts){ return hourOf(ts) < HORA_CORTE; }
 
-function toast(msg, type=''){
+function setSyncDot(state){
+  document.getElementById('syncDot').className='sync-dot '+state;
+}
+function toast(msg,type=''){
   const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast '+(type);
+  t.textContent=msg; t.className='toast '+type;
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
-
-// ─── HEADER DATE ─────────────────────────────────────────────────
 function updateTopDate(){
   const d=new Date();
   const days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -381,7 +389,7 @@ function goTo(screen){
   if(screen==='progreso') renderProgress();
 }
 
-// ─── BUILD FORM ──────────────────────────────────────────────────
+// ─── BUILD REGISTRO FORM ─────────────────────────────────────────
 function buildForm(){
   const sl=document.getElementById('sym-list');
   sl.innerHTML='';
@@ -402,7 +410,7 @@ function buildForm(){
       document.getElementById('sv-'+sym).textContent=val;
       document.getElementById('sv-'+sym).className='star-val has';
       document.querySelectorAll(`#stars-${sym} .star`).forEach(b=>{
-        b.classList.toggle('on', parseInt(b.dataset.val)<=val);
+        b.classList.toggle('on',parseInt(b.dataset.val)<=val);
       });
     });
   });
@@ -437,24 +445,25 @@ function toggleNotes(){
 }
 
 // ─── GUARDAR ─────────────────────────────────────────────────────
-function guardar(){
+async function guardar(){
   const missing=SYMPTOMS.filter(s=>scores[s.id]===0).map(s=>s.label);
   const missingP=PRESSURE.filter(p=>pressure[p.id]===null).map(p=>p.label);
-  if(missing.length||missingP.length){
-    toast('Completa todos los campos','err'); return;
-  }
-  const data=loadData();
+  if(missing.length||missingP.length){ toast('Completa todos los campos','err'); return; }
+
+  setSyncDot('syncing');
   const entry={
     id:uid(), ts:nowStr(),
-    ...Object.fromEntries(SYMPTOMS.map(s=>[s.id,scores[s.id]])),
-    ...Object.fromEntries(PRESSURE.map(p=>['p_'+p.id, pressure[p.id]])),
-    nota: document.getElementById('nota-txt').value.trim()
+    estabilidad:scores.estabilidad, rigidez:scores.rigidez,
+    habla:scores.habla, coordinacion:scores.coordinacion,
+    vision:scores.vision, fatiga:scores.fatiga,
+    p_cabeza:pressure.cabeza, p_cervical:pressure.cervical, p_pectoral:pressure.pectoral,
+    nota:document.getElementById('nota-txt').value.trim()
   };
-  data.push(entry);
-  saveData(data);
-  resetForm();
+  const {error}=await db.from('registros').insert([entry]);
+  if(error){ setSyncDot('err'); toast('Error al guardar. Comprueba conexión','err'); console.error(error); return; }
+  setSyncDot('ok');
   toast('Registro guardado','ok');
-  checkReminder();
+  resetForm();
 }
 
 function resetForm(){
@@ -473,72 +482,30 @@ function resetForm(){
   document.getElementById('notes-toggle-label').textContent='Añadir nota';
 }
 
-// ─── EXPORTAR CSV ─────────────────────────────────────────────────
-function exportarCSV(){
-  const data=loadData();
-  if(!data.length){ toast('No hay registros','err'); return; }
-  const headers=['Fecha y hora',...SYMPTOMS.map(s=>s.label),...PRESSURE.map(p=>'Presión '+p.label),'Notas'];
+// ─── EXPORTAR CSV ────────────────────────────────────────────────
+async function exportarCSV(){
+  setSyncDot('syncing');
+  const {data,error}=await db.from('registros').select('*').order('ts',{ascending:true});
+  if(error||!data||!data.length){ setSyncDot('err'); toast('No hay datos para exportar','err'); return; }
+  setSyncDot('ok');
+  const headers=['Fecha y hora','Franja','Inestabilidad','Rigidez','Dificultad en el habla','Descoordinación','Visión periférica','Nivel de fatiga','Presión cabeza','Presión cervical','Presión pectoral','Notas'];
   const rows=data.map(r=>[
-    r.ts,
-    ...SYMPTOMS.map(s=>r[s.id]),
-    ...PRESSURE.map(p=>r['p_'+p.id]),
+    r.ts, isManana(r.ts)?'Mañana':'Tarde',
+    r.estabilidad,r.rigidez,r.habla,r.coordinacion,r.vision,r.fatiga,
+    r.p_cabeza,r.p_cervical,r.p_pectoral,
     '"'+(r.nota||'').replace(/"/g,'""')+'"'
   ].join(','));
   const csv=[headers.join(','),...rows].join('\n');
-  downloadFile('\uFEFF'+csv, `ataxia_${todayStr()}.csv`, 'text/csv');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`ataxia_${todayStr()}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
   toast('CSV exportado','ok');
 }
 
-// ─── BACKUP / RESTORE ────────────────────────────────────────────
-function hacerBackup(){
-  const data=loadData();
-  if(!data.length){ toast('No hay datos para guardar','err'); return; }
-  downloadFile(JSON.stringify(data,null,2), `ataxia_backup_${todayStr()}.json`, 'application/json');
-  setLastBackup();
-  toast('Backup guardado','ok');
-  document.getElementById('reminder-box').style.display='none';
-}
-
-function restaurar(event){
-  const file=event.target.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const data=JSON.parse(e.target.result);
-      if(!Array.isArray(data)) throw new Error();
-      if(!confirm(`¿Restaurar ${data.length} registros? Los datos actuales serán reemplazados.`)) return;
-      saveData(data);
-      toast('Datos restaurados correctamente','ok');
-    }catch(err){ toast('Archivo no válido','err'); }
-  };
-  reader.readAsText(file);
-  event.target.value='';
-}
-
-function downloadFile(content, filename, mime){
-  const blob=new Blob([content],{type:mime});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-// ─── REMINDER ────────────────────────────────────────────────────
-function checkReminder(){
-  const last=getLastBackup();
-  const days7=7*24*60*60*1000;
-  if(last && Date.now()-last > days7){
-    document.getElementById('reminder-box').style.display='flex';
-  }
-}
-function dismissReminder(){
-  document.getElementById('reminder-box').style.display='none';
-}
-
-// ─── PROGRESS SCREEN ─────────────────────────────────────────────
+// ─── PROGRESS ────────────────────────────────────────────────────
 function buildSymChecks(){
   const cont=document.getElementById('sym-checks');
   cont.innerHTML='';
@@ -556,11 +523,10 @@ function buildSymChecks(){
   });
 }
 
-function setPeriod(days, key, btn){
+function setPeriod(days,btn){
   document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const to=new Date();
-  const from=new Date();
+  const to=new Date(), from=new Date();
   from.setDate(from.getDate()-(days-1));
   document.getElementById('f-desde').value=`${from.getFullYear()}-${pad(from.getMonth()+1)}-${pad(from.getDate())}`;
   document.getElementById('f-hasta').value=`${to.getFullYear()}-${pad(to.getMonth()+1)}-${pad(to.getDate())}`;
@@ -568,120 +534,128 @@ function setPeriod(days, key, btn){
 }
 
 function initDates(){
-  const to=new Date();
-  const from=new Date(); from.setDate(from.getDate()-6);
+  const to=new Date(), from=new Date();
+  from.setDate(from.getDate()-6);
   document.getElementById('f-desde').value=`${from.getFullYear()}-${pad(from.getMonth()+1)}-${pad(from.getDate())}`;
   document.getElementById('f-hasta').value=`${to.getFullYear()}-${pad(to.getMonth()+1)}-${pad(to.getDate())}`;
 }
 
-function renderProgress(){
+async function renderProgress(){
   const desde=document.getElementById('f-desde').value;
   const hasta=document.getElementById('f-hasta').value;
   if(!desde||!hasta) return;
 
-  const all=loadData();
-  const filtered=all.filter(r=>dateOf(r.ts)>=desde && dateOf(r.ts)<=hasta);
+  setSyncDot('syncing');
+  const {data,error}=await db.from('registros')
+    .select('*')
+    .gte('ts',desde+' 00:00')
+    .lte('ts',hasta+' 23:59')
+    .order('ts',{ascending:true});
 
-  // Count days in range
+  if(error){ setSyncDot('err'); toast('Error al cargar datos','err'); return; }
+  setSyncDot('ok');
+
+  const all=data||[];
+  const manana=all.filter(r=>isManana(r.ts));
+  const tarde=all.filter(r=>!isManana(r.ts));
+
   const d1=new Date(desde), d2=new Date(hasta);
   const diffDays=Math.round((d2-d1)/(1000*60*60*24))+1;
   const aggregate=diffDays>7;
 
-  renderChart(filtered, aggregate, desde, hasta, diffDays);
-  renderPresBands(filtered, aggregate, desde, hasta, diffDays);
-  renderHist(filtered);
+  renderChart(manana, aggregate, 'chartManana', 'emptyManana', chartM, c=>chartM=c);
+  renderChart(tarde,  aggregate, 'chartTarde',  'emptyTarde',  chartT, c=>chartT=c);
+  renderPresBands(manana, aggregate, 'pres-manana-bands', 'Mañana');
+  renderPresBands(tarde,  aggregate, 'pres-tarde-bands',  'Tarde');
+  renderHist(all);
 }
 
-function renderChart(data, aggregate, desde, hasta, diffDays){
-  const ctx=document.getElementById('mainChart').getContext('2d');
-  if(chart){ chart.destroy(); chart=null; }
-  if(!data.length){
-    // empty
-    chart=new Chart(ctx,{type:'line',data:{labels:[],datasets:[]},options:{plugins:{legend:{display:false}}}});
-    return;
-  }
+// Agrupa por día, devuelve {labels, bySlot} donde bySlot[label]=[registros]
+function agruparPorDia(data){
+  const byDay={};
+  data.forEach(r=>{
+    const day=dateOf(r.ts);
+    if(!byDay[day]) byDay[day]=[];
+    byDay[day].push(r);
+  });
+  return byDay;
+}
 
-  let labels=[], datasets=[];
-
+function buildChartData(data, aggregate){
   if(!aggregate){
-    // Individual points by timestamp
+    // Puntos individuales por timestamp
     const sorted=[...data].sort((a,b)=>a.ts.localeCompare(b.ts));
-    labels=sorted.map(r=>r.ts.slice(11,16)+'\n'+r.ts.slice(5,10));
-
-    visibleSyms.forEach((sid,i)=>{
-      const sym=SYMPTOMS.find(s=>s.id===sid);
-      datasets.push({
-        label:sym.label,
+    const labels=sorted.map(r=>r.ts.slice(11,16)+'\n'+r.ts.slice(5,10));
+    const datasets=visibleSyms.map((sid)=>{
+      const idx=SYMPTOMS.findIndex(s=>s.id===sid);
+      return {
+        label:SYMPTOMS[idx].label,
         data:sorted.map(r=>r[sid]),
-        borderColor:SYM_COLORS[SYMPTOMS.findIndex(s=>s.id===sid)],
+        borderColor:SYM_COLORS[idx],
         backgroundColor:'transparent',
         pointRadius:sorted.map(r=>r.nota?7:5),
         pointStyle:sorted.map(r=>r.nota?'rectRot':'circle'),
-        tension:0.3,
-        borderWidth:2,
-      });
+        tension:0.3, borderWidth:2,
+      };
     });
+    return {labels, datasets, sorted};
   } else {
-    // Aggregate by day
-    const byDay={};
-    data.forEach(r=>{
-      const day=dateOf(r.ts);
-      if(!byDay[day]) byDay[day]={entries:[],hasExtra:false};
-      byDay[day].entries.push(r);
-    });
-    Object.keys(byDay).forEach(day=>{
-      if(byDay[day].entries.length>2) byDay[day].hasExtra=true;
-    });
+    // Promedio por día con triángulo si hay más de 1 registro
+    const byDay=agruparPorDia(data);
     const days=Object.keys(byDay).sort();
-    labels=days.map(d=>d.slice(5));
-
-    visibleSyms.forEach((sid,i)=>{
-      const sym=SYMPTOMS.find(s=>s.id===sid);
-      const vals=days.map(day=>{
-        const entries=byDay[day].entries;
-        const avg=entries.reduce((sum,r)=>sum+r[sid],0)/entries.length;
-        return Math.round(avg*10)/10;
-      });
-      const pStyles=days.map(day=>byDay[day].hasExtra?'triangle':'circle');
-      const pSizes=days.map(day=>byDay[day].hasExtra?8:5);
-      datasets.push({
-        label:sym.label,
-        data:vals,
-        borderColor:SYM_COLORS[SYMPTOMS.findIndex(s=>s.id===sid)],
+    const labels=days.map(d=>d.slice(5));
+    const datasets=visibleSyms.map((sid)=>{
+      const idx=SYMPTOMS.findIndex(s=>s.id===sid);
+      return {
+        label:SYMPTOMS[idx].label,
+        data:days.map(day=>{
+          const entries=byDay[day];
+          const avg=entries.reduce((s,r)=>s+r[sid],0)/entries.length;
+          return Math.round(avg*10)/10;
+        }),
+        borderColor:SYM_COLORS[idx],
         backgroundColor:'transparent',
-        pointStyle:pStyles,
-        pointRadius:pSizes,
-        tension:0.3,
-        borderWidth:2,
-      });
+        pointStyle:days.map(day=>byDay[day].length>1?'triangle':'circle'),
+        pointRadius:days.map(day=>byDay[day].length>1?8:5),
+        tension:0.3, borderWidth:2,
+      };
     });
+    return {labels, datasets, sorted:null, byDay, days};
   }
+}
 
-  chart=new Chart(ctx,{
+function renderChart(data, aggregate, canvasId, emptyId, existingChart, setChart){
+  const ctx=document.getElementById(canvasId).getContext('2d');
+  const emptyEl=document.getElementById(emptyId);
+  if(existingChart){ existingChart.destroy(); setChart(null); }
+
+  if(!data.length){
+    emptyEl.style.display='block';
+    document.getElementById(canvasId).style.display='none';
+    return;
+  }
+  emptyEl.style.display='none';
+  document.getElementById(canvasId).style.display='block';
+
+  const {labels, datasets, sorted}=buildChartData(data, aggregate);
+
+  const newChart=new Chart(ctx,{
     type:'line',
     data:{labels, datasets},
     options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
       plugins:{
-        legend:{
-          position:'bottom',
-          labels:{font:{size:11},boxWidth:12,padding:10}
-        },
-        tooltip:{
-          callbacks:{
-            afterBody: function(items){
-              if(!aggregate){
-                const idx=items[0].dataIndex;
-                const sorted=[...data].sort((a,b)=>a.ts.localeCompare(b.ts));
-                const r=sorted[idx];
-                if(r.nota) return ['📝 '+r.nota.slice(0,60)+(r.nota.length>60?'…':'')];
-              }
-              return [];
+        legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{
+          afterBody:function(items){
+            if(!aggregate && sorted){
+              const r=sorted[items[0].dataIndex];
+              if(r&&r.nota) return ['📝 '+r.nota.slice(0,60)+(r.nota.length>60?'…':'')];
             }
+            return [];
           }
-        }
+        }}
       },
       scales:{
         y:{min:0,max:5,ticks:{stepSize:1,font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},
@@ -689,12 +663,22 @@ function renderChart(data, aggregate, desde, hasta, diffDays){
       }
     }
   });
+  setChart(newChart);
 }
 
-function renderPresBands(data, aggregate, desde, hasta, diffDays){
-  const cont=document.getElementById('pres-bands');
+function renderPresBands(data, aggregate, containerId, franjaLabel){
+  const cont=document.getElementById(containerId);
   cont.innerHTML='';
-  if(!data.length){ cont.innerHTML='<div style="font-size:13px;color:var(--text2)">Sin datos en este período.</div>'; return; }
+
+  if(!data.length){
+    cont.innerHTML=`<div style="font-size:12px;color:var(--gray3);padding:4px 0">${franjaLabel}: sin datos.</div>`;
+    return;
+  }
+
+  const labelEl=document.createElement('div');
+  labelEl.style.cssText='font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px';
+  labelEl.textContent=franjaLabel;
+  cont.appendChild(labelEl);
 
   if(!aggregate){
     const sorted=[...data].sort((a,b)=>a.ts.localeCompare(b.ts));
@@ -707,12 +691,7 @@ function renderPresBands(data, aggregate, desde, hasta, diffDays){
       cont.appendChild(band);
     });
   } else {
-    const byDay={};
-    data.forEach(r=>{
-      const day=dateOf(r.ts);
-      if(!byDay[day]) byDay[day]=[];
-      byDay[day].push(r);
-    });
+    const byDay=agruparPorDia(data);
     const days=Object.keys(byDay).sort();
     PRESSURE.forEach(p=>{
       const band=document.createElement('div');
@@ -728,21 +707,24 @@ function renderPresBands(data, aggregate, desde, hasta, diffDays){
   }
 }
 
+// ─── HISTORIAL ───────────────────────────────────────────────────
 function renderHist(data){
   const cont=document.getElementById('hist-list');
   cont.innerHTML='';
   const sorted=[...data].sort((a,b)=>b.ts.localeCompare(a.ts));
   if(!sorted.length){ cont.innerHTML='<div class="empty">Sin registros en este período.</div>'; return; }
   sorted.forEach(r=>{
+    const m=isManana(r.ts);
     const card=document.createElement('div');
     card.className='hist-card';
     const noteDot=r.nota?'<span class="hist-note-dot" title="Tiene nota"></span>':'';
     card.innerHTML=`
       <div class="hist-head" onclick="toggleHist('hb-${r.id}')">
         <span class="hist-ts">${r.ts}</span>
+        <span class="hist-franja ${m?'m':'t'}">${m?'Mañana':'Tarde'}</span>
         ${noteDot}
         <button class="hist-edit" onclick="event.stopPropagation();openEdit('${r.id}')">Editar</button>
-        <button class="hist-del" onclick="event.stopPropagation();eliminar('${r.id}')">✕</button>
+        <button class="hist-del"  onclick="event.stopPropagation();eliminar('${r.id}')">✕</button>
       </div>
       <div class="hist-body" id="hb-${r.id}">
         <div class="hist-scores">${SYMPTOMS.map(s=>`<span class="hist-pill">${s.label.split(' ')[0]}: ${r[s.id]}</span>`).join('')}</div>
@@ -758,23 +740,26 @@ function toggleHist(id){
   if(el) el.classList.toggle('open');
 }
 
-function eliminar(id){
+async function eliminar(id){
   if(!confirm('¿Eliminar este registro?')) return;
-  const data=loadData().filter(r=>r.id!==id);
-  saveData(data);
-  renderProgress();
+  setSyncDot('syncing');
+  const {error}=await db.from('registros').delete().eq('id',id);
+  if(error){ setSyncDot('err'); toast('Error al eliminar','err'); return; }
+  setSyncDot('ok');
   toast('Registro eliminado');
+  renderProgress();
 }
 
-// ─── EDIT MODAL ───────────────────────────────────────────────────
-function openEdit(id){
-  const data=loadData();
-  const r=data.find(x=>x.id===id);
-  if(!r) return;
+// ─── EDIT MODAL ──────────────────────────────────────────────────
+async function openEdit(id){
+  setSyncDot('syncing');
+  const {data,error}=await db.from('registros').select('*').eq('id',id).single();
+  if(error||!data){ setSyncDot('err'); toast('Error al cargar registro','err'); return; }
+  setSyncDot('ok');
   editId=id;
+  const r=data;
 
-  let html=`<p style="font-size:12px;color:var(--text2);margin-bottom:14px">${r.ts}</p>`;
-
+  let html=`<p style="font-size:12px;color:var(--text2);margin-bottom:14px">${r.ts} · ${isManana(r.ts)?'Mañana':'Tarde'}</p>`;
   SYMPTOMS.forEach(s=>{
     html+=`<div style="margin-bottom:12px">
       <div style="font-size:13px;color:var(--text2);margin-bottom:6px">${s.label}</div>
@@ -783,7 +768,6 @@ function openEdit(id){
       </div>
     </div>`;
   });
-
   PRESSURE.forEach(p=>{
     html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="flex:1;font-size:14px">${p.label}</span>
@@ -793,9 +777,7 @@ function openEdit(id){
       </div>
     </div>`;
   });
-
   html+=`<textarea id="modal-nota" placeholder="Nota…" style="width:100%;margin-top:4px">${r.nota||''}</textarea>`;
-
   document.getElementById('modal-body').innerHTML=html;
 
   document.querySelectorAll('[data-msym]').forEach(btn=>{
@@ -813,7 +795,6 @@ function openEdit(id){
       document.getElementById('mno-'+z).className='tog-btn'+(v==='no'?' no':'');
     });
   });
-
   document.getElementById('modal-overlay').classList.add('open');
 }
 
@@ -822,33 +803,31 @@ function closeModal(){
   editId=null;
 }
 
-function saveEdit(){
-  const data=loadData();
-  const idx=data.findIndex(r=>r.id===editId);
-  if(idx===-1){ closeModal(); return; }
-  const r=data[idx];
-
+async function saveEdit(){
+  const updates={};
   SYMPTOMS.forEach(s=>{
     const on=document.querySelectorAll(`#me-stars-${s.id} .star.on`);
-    r[s.id]=on.length;
+    updates[s.id]=on.length;
   });
   PRESSURE.forEach(p=>{
-    if(document.getElementById('msi-'+p.id).classList.contains('si')) r['p_'+p.id]='si';
-    else if(document.getElementById('mno-'+p.id).classList.contains('no')) r['p_'+p.id]='no';
+    if(document.getElementById('msi-'+p.id).classList.contains('si')) updates['p_'+p.id]='si';
+    else if(document.getElementById('mno-'+p.id).classList.contains('no')) updates['p_'+p.id]='no';
   });
-  r.nota=document.getElementById('modal-nota').value.trim();
-  data[idx]=r;
-  saveData(data);
+  updates.nota=document.getElementById('modal-nota').value.trim();
+  setSyncDot('syncing');
+  const {error}=await db.from('registros').update(updates).eq('id',editId);
+  if(error){ setSyncDot('err'); toast('Error al guardar cambios','err'); return; }
+  setSyncDot('ok');
   closeModal();
-  renderProgress();
   toast('Registro actualizado','ok');
+  renderProgress();
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────
+// ─── INIT ────────────────────────────────────────────────────────
 buildForm();
 buildSymChecks();
 initDates();
-checkReminder();
+setSyncDot('ok');
 </script>
 </body>
 </html>
