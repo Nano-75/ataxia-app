@@ -1,0 +1,17 @@
+name: Latido Supabase
+
+on:
+  schedule:
+    - cron: '0 8 */2 * *'   # cada 2 días a las 08:00 UTC
+  workflow_dispatch:         # permite lanzarlo a mano para probarlo
+
+jobs:
+  latido:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar la base de datos
+        run: |
+          curl --fail --silent --show-error \
+            "https://xgrowiforncfnyqosirs.supabase.co/rest/v1/registros?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhncm93aWZvcm5jZm55cW9zaXJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNjIxODcsImV4cCI6MjEwMjYzODE4N30.t72xXytWINbXbfn5WalwDeKxOaSGqpnqDiBFNO5OyZU" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhncm93aWZvcm5jZm55cW9zaXJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNjIxODcsImV4cCI6MjEwMjYzODE4N30.t72xXytWINbXbfn5WalwDeKxOaSGqpnqDiBFNO5OyZU"
