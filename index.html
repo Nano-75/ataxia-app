@@ -100,6 +100,27 @@ textarea:focus{outline:none;border-color:var(--blue)}
 .toast.ok{background:var(--green)}
 .toast.err{background:var(--red)}
 
+/* INFORME (impresión) */
+#report{display:none;color:#1c1c1a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rep-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #1a56a0;padding-bottom:4px;margin-bottom:8px}
+.rep-head h2{font-size:16px;color:#1a56a0}
+.rep-head span{font-size:11px;color:#5f5e5a}
+.rep-block h3{font-size:12px;margin:4px 0 2px}
+.rep-block img{width:100%;height:auto;display:block}
+.rep-pres{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+.rep-legend{font-size:10px;color:#5f5e5a;margin-top:4px}
+.rep-page2{break-before:page;page-break-before:always}
+.rep-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.rep-table th,.rep-table td{border-bottom:0.5px solid #c8c7c3;padding:5px 6px;text-align:left;vertical-align:top}
+.rep-table th{font-size:11px;color:#5f5e5a}
+.rep-table tr{break-inside:avoid;page-break-inside:avoid}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  html,body{height:auto!important;overflow:visible!important;background:#fff}
+  #app,.modal-overlay,.toast{display:none!important}
+  #report{display:block}
+}
+
 /* PROGRESS */
 .filter-bar{background:#fff;border-radius:var(--radius);border:0.5px solid var(--border);padding:12px 14px;margin-bottom:10px}
 .filter-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -235,6 +256,9 @@ canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
           <span class="filter-label">Hasta</span>
           <input type="date" id="f-hasta" onchange="renderProgress()">
         </div>
+        <div class="filter-row" style="margin-top:10px">
+          <button class="act-btn save" style="width:100%" onclick="generarInforme()">Informe (imprimir / PDF)</button>
+        </div>
       </div>
 
       <!-- Selector síntomas -->
@@ -311,6 +335,8 @@ canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
     </div>
   </div>
 </div>
+
+<div id="report"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -824,6 +850,71 @@ async function saveEdit(){
   closeModal();
   toast('Registro actualizado','ok');
   renderProgress();
+}
+
+
+// ─── INFORME ─────────────────────────────────────────────────────
+function esc(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtFecha(d){ return d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4); }
+
+function chartToImage(data, aggregate){
+  if(!data.length) return null;
+  const {labels, datasets}=buildChartData(data, aggregate);
+  const cv=document.createElement('canvas');
+  cv.width=1000; cv.height=210;
+  const c=new Chart(cv,{
+    type:'line', data:{labels,datasets},
+    options:{
+      animation:false, responsive:false, devicePixelRatio:2,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:10}}},
+      scales:{
+        y:{min:0,max:5,ticks:{stepSize:1,font:{size:11}},grid:{color:'rgba(0,0,0,0.08)'}},
+        x:{ticks:{font:{size:10},maxRotation:45},grid:{display:false}}
+      }
+    }
+  });
+  const url=c.toBase64Image();
+  c.destroy();
+  return url;
+}
+
+async function generarInforme(){
+  const desde=document.getElementById('f-desde').value;
+  const hasta=document.getElementById('f-hasta').value;
+  if(!desde||!hasta){ toast('Elige las fechas','err'); return; }
+  setSyncDot('syncing');
+  const {data,error}=await db.from('registros').select('*')
+    .gte('ts',desde+' 00:00').lte('ts',hasta+' 23:59').order('ts',{ascending:true});
+  if(error){ setSyncDot('err'); toast('Error al cargar datos','err'); return; }
+  setSyncDot('ok');
+  const all=data||[];
+  if(!all.length){ toast('No hay registros en este período','err'); return; }
+
+  const manana=all.filter(r=>isManana(r.ts));
+  const tarde=all.filter(r=>!isManana(r.ts));
+  const diffDays=Math.round((new Date(hasta)-new Date(desde))/(1000*60*60*24))+1;
+  const aggregate=diffDays>7;
+  const imgM=chartToImage(manana,aggregate);
+  const imgT=chartToImage(tarde,aggregate);
+  const bloque=(titulo,img)=>`<div class="rep-block"><h3>${titulo}</h3>${img?`<img src="${img}">`:'<div style="font-size:12px;color:#888780;padding:10px 0">Sin registros en esta franja.</div>'}</div>`;
+
+  const conNota=all.filter(r=>r.nota);
+  const filasNotas=conNota.map(r=>`<tr><td style="white-space:nowrap">${esc(r.ts)}</td><td>${isManana(r.ts)?'Mañana':'Tarde'}</td><td>${esc(r.nota)}</td></tr>`).join('');
+
+  document.getElementById('report').innerHTML=`
+    <div class="rep-head"><h2>Registro de síntomas · Ataxia</h2>
+      <span>Período: ${fmtFecha(desde)} – ${fmtFecha(hasta)} · ${all.length} registros (${manana.length} mañana, ${tarde.length} tarde)</span></div>
+    ${bloque('Mañana · 0h–12h',imgM)}
+    ${bloque('Tarde · 12h–24h',imgT)}
+    <div class="rep-pres"><div id="rep-pres-m"></div><div id="rep-pres-t"></div></div>
+    <div class="rep-legend">Escala 0–5 · ${aggregate?'Promedio diario; ▲ = más de un registro ese día · ':''}◆ = registro con nota · Presión: color = Sí, gris = No</div>
+    <div class="rep-page2">
+      <div class="rep-head"><h2>Notas</h2><span>${fmtFecha(desde)} – ${fmtFecha(hasta)} · Generado el ${nowStr()}</span></div>
+      ${conNota.length?`<table class="rep-table"><thead><tr><th>Fecha y hora</th><th>Franja</th><th>Nota</th></tr></thead><tbody>${filasNotas}</tbody></table>`:'<p style="font-size:13px;color:#5f5e5a;margin-top:8px">No hay notas en este período.</p>'}
+    </div>`;
+  renderPresBands(manana,aggregate,'rep-pres-m','Mañana');
+  renderPresBands(tarde,aggregate,'rep-pres-t','Tarde');
+  setTimeout(()=>window.print(),400);
 }
 
 // ─── INIT ────────────────────────────────────────────────────────
