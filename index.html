@@ -667,12 +667,14 @@ function renderChart(data, aggregate, canvasId, emptyId, existingChart, setChart
   document.getElementById(canvasId).style.display='block';
 
   const {labels, datasets, sorted}=buildChartData(data, aggregate);
+  datasets.forEach(d=>d.clip=false);
 
   const newChart=new Chart(ctx,{
     type:'line',
     data:{labels, datasets},
     options:{
       responsive:true, maintainAspectRatio:false,
+      layout:{padding:{top:10,right:10,bottom:2,left:2}},
       interaction:{mode:'index', intersect:false},
       plugins:{
         legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8}},
@@ -860,12 +862,14 @@ function fmtFecha(d){ return d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4); }
 function chartToImage(data, aggregate){
   if(!data.length) return null;
   const {labels, datasets}=buildChartData(data, aggregate);
+  datasets.forEach(d=>d.clip=false);
   const cv=document.createElement('canvas');
   cv.width=1000; cv.height=210;
   const c=new Chart(cv,{
     type:'line', data:{labels,datasets},
     options:{
       animation:false, responsive:false, devicePixelRatio:2,
+      layout:{padding:{top:10,right:10,bottom:2,left:2}},
       plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:10}}},
       scales:{
         y:{min:0,max:5,ticks:{stepSize:1,font:{size:11}},grid:{color:'rgba(0,0,0,0.08)'}},
